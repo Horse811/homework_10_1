@@ -2,7 +2,7 @@ def filter_by_state(operations: list[dict], state: str = 'EXECUTED') -> list[dic
     """
     Фильтрует список словарей по значению ключа 'state'.
 
-    :param operations: Список словарей с данными операций.
+    :param operations: Список словарей с данными операции.
     :param state: Значение ключа 'state' для фильтрации (по умолчанию 'EXECUTED').
     :return: Отфильтрованный список словарей.
     """
