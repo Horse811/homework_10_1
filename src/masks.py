@@ -1,22 +1,42 @@
-from typing import Union
+def get_mask_card_number(card_number: str) -> str:
+    """Функция принимает на вход номер карты и возвращает маску номера.
+
+    Формат маски: XXXX XX** **** XXXX
+
+    Args:
+        card_number: Номер карты (может содержать пробелы/разделители)
+
+    Returns:
+        Маскированный номер карты или сообщение об ошибке
+    """
+    if not isinstance(card_number, str) or not card_number.strip():
+        return "Некорректный номер карты"
+
+    cleaned_number = "".join(c for c in card_number if c.isdigit())
+
+    if len(cleaned_number) != 16:
+        return "Номер карты должен содержать 16 цифр"
+
+    return f"{cleaned_number[:4]} {cleaned_number[4:6]}** **** {cleaned_number[-4:]}"
 
 
-def get_mask_card_number(card_number: Union[str]) -> Union[str]:
-    """Функция принимает на вход номер карты в виде числа и
-    возвращает маску номера по правилу XXXX XX** **** XXXX"""
-    if card_number.isdigit() and len(card_number) == 16:
-        masked_number = (
-            card_number[0:4] + " " + card_number[4:6] + "** **** " + card_number[-4:]
-        )
-        return masked_number
-    else:
-        return "Проверьте правильность введенного номера карты!"
+def get_mask_account(account_number: str) -> str:
+    """Функция принимает на вход номер счета и возвращает маску номера.
 
+    Формат маски: **XXXX
 
-def get_mask_account(account_number: Union[str]) -> Union[str]:
-    """Функция принимает на вход номер счета в виде числа и возвращает маску номера по правилу **XXXX"""
-    if account_number.isdigit() and len(account_number) == 20:
-        masked_account = "**" + account_number[-4:]
-        return masked_account
-    else:
-        return "Проверьте правильность введенного номера счета"
+    Args:
+        account_number: Номер счета (может содержать пробелы/разделители)
+
+    Returns:
+        Маскированный номер счета или сообщение об ошибке
+    """
+    if not isinstance(account_number, str) or not account_number.strip():
+        return "Некорректный номер счета"
+
+    cleaned_number = "".join(c for c in account_number if c.isdigit())
+
+    if len(cleaned_number) != 20:
+        return "Номер счета должен содержать 20 цифр"
+
+    return f"**{cleaned_number[-4:]}"
