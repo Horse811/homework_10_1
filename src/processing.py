@@ -1,20 +1,51 @@
-def filter_by_state(operations: list[dict], state: str = 'EXECUTED') -> list[dict]:
-    """
-    Фильтрует список словарей по значению ключа 'state'.
-
-    :param operations: Список словарей с данными операции.
-    :param state: Значение ключа 'state' для фильтрации (по умолчанию 'EXECUTED').
-    :return: Отфильтрованный список словарей.
-    """
-    return [operation for operation in operations if operation.get('state') == state]
+from datetime import datetime
+from typing import List, Dict, Optional
 
 
-def sort_by_date(operations: list[dict], reverse: bool = True) -> list[dict]:
+def filter_by_state(operations: List[Dict], state: str = "EXECUTED") -> List[Dict]:
     """
-    Сортирует список словарей по ключу 'date'.
+    Фильтрует список операций по указанному статусу.
 
-    :param operations: Список словарей с данными операций.
-    :param reverse: Флаг сортировки по убыванию (по умолчанию True).
-    :return: Отсортированный список словарей.
+    Args:
+        operations: Список словарей с операциями
+        state: Статус для фильтрации (по умолчанию "EXECUTED")
+
+    Returns:
+        Отфильтрованный список операций
+
+    Raises:
+        ValueError: Если operations не является списком
     """
-    return sorted(operations, key=lambda x: x['date'], reverse=reverse)
+    if not isinstance(operations, list):
+        raise ValueError("Operations должен быть списком")
+
+    return [op for op in operations if op.get("state") == state]
+
+
+def sort_by_date(operations: List[Dict], reverse: bool = True) -> List[Dict]:
+    """
+    Сортирует операции по дате.
+
+    Args:
+        operations: Список словарей с операциями
+        reverse: Порядок сортировки (True - по убыванию, False - по возрастанию)
+
+    Returns:
+        Отсортированный список операций
+
+    Raises:
+        ValueError: Если operations не содержит поле 'date' или неверный формат даты
+    """
+    if not operations:
+        return []
+
+    try:
+        return sorted(
+            operations,
+            key=lambda x: datetime.strptime(x["date"], "%Y-%m-%dT%H:%M:%S.%f"),
+            reverse=reverse
+        )
+    except KeyError:
+        raise ValueError("Один или несколько элементов не содержат поле 'date'")
+    except ValueError as e:
+        raise ValueError(f"Неверный формат даты: {e}")
