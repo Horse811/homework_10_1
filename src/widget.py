@@ -10,11 +10,19 @@ def mask_account_card(data: str) -> str:
     else:
         raise ValueError("Некорректный формат данных")
 
+
+from datetime import datetime
+
+
 def get_date(date_str: str) -> str:
-    """Преобразует дату из формата 'YYYY-MM-DDTHH:MM:SS.SSS' в 'DD.MM.YYYY'."""
+    """Преобразует дату из формата 'YYYY-MM-DDThh:mm:ss.sss' в 'DD.MM.YYYY'.
+    Вызывает ValueError для пустых строк или некорректных форматов."""
     if not date_str:
-        raise ValueError("Пустая строка даты")
+        raise ValueError("Дата не может быть пустой строкой")
+
     try:
-        return f"{date_str[8:10]}.{date_str[5:7]}.{date_str[:4]}"
-    except IndexError:
-        raise IndexError("Неполная дата") from None
+        # Пытаемся распарсить дату (обрезаем до 19 символов, чтобы игнорировать миллисекунды)
+        dt = datetime.strptime(date_str[:19], "%Y-%m-%dT%H:%M:%S")
+        return dt.strftime("%d.%m.%Y")
+    except ValueError:
+        raise ValueError("Неверный формат даты. Ожидается 'YYYY-MM-DDThh:mm:ss...'")
