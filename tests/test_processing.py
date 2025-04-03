@@ -12,21 +12,25 @@ class TestProcessing(unittest.TestCase):
         ]
 
     @parameterized.expand([
-        ("EXECUTED", [1, 3]),
-        ("PENDING", [2]),
-        ("CANCELED", []),
+        ("EXECUTED_state", "EXECUTED", [1, 3]),
+        ("PENDING_state", "PENDING", [2]),
+        ("CANCELED_state", "CANCELED", []),
     ])
-    def test_filter_by_state(self, state, expected_ids):
+    def test_filter_by_state(self, _, state, expected_ids):
         result = filter_by_state(self.operations, state)
         self.assertEqual([op["id"] for op in result], expected_ids)
 
     @parameterized.expand([
-        (True, [1, 2, 3]),   # По убыванию даты
-        (False, [3, 2, 1]),  # По возрастанию даты
+        ("Descending_sort", True, [1, 2, 3]),
+        ("Ascending_sort", False, [3, 2, 1]),
     ])
-    def test_sort_by_date(self, reverse, expected_order):
+    def test_sort_by_date(self, _, reverse, expected_order):
         result = sort_by_date(self.operations, reverse=reverse)
         self.assertEqual([op["id"] for op in result], expected_order)
+
+    def test_empty_input(self):
+        self.assertEqual(filter_by_state([], "EXECUTED"), [])
+        self.assertEqual(sort_by_date([]), [])
 
 
 if __name__ == "__main__":
