@@ -30,10 +30,16 @@ def filter_by_currency(
     yield from filtered
 
 
-def transaction_descriptions(transactions: List[Dict[str, Any]]) -> Iterator[str]:
-    """Извлекает описания транзакций."""
+def transaction_descriptions(transactions):
+    """Генератор описаний транзакций с обработкой ошибок"""
+    if not transactions:
+        yield "Отсутствуют данные для обработки"
+        return
+
     for t in transactions:
-        if "description" in t:
+        if "description" not in t:
+            yield "Ошибка! Отсутствует описание транзакции"
+        else:
             yield t["description"]
 
 
