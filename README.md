@@ -116,7 +116,8 @@ for card in generator:
 tests/
 ├── test_masks.py       # Тесты масок карт/счетов (5 тестов)
 ├── test_processing.py  # Тесты обработки операций (5 тестов)
-└── test_widget.py      # Тесты виджетов (5 тестов)
+├── test_widget.py      # Тесты виджетов (5 тестов)
+└── test_generators.py  # Тесты генераторов 
 ```
 
 ### Ключевые особенности:
