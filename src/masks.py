@@ -1,3 +1,6 @@
+from src.decorators import log
+
+@log()
 def get_mask_card_number(card_number: str) -> str:
     """Маскирует номер карты (формат: XXXX XX** **** XXXX)."""
     if not card_number or len(card_number) != 16 or not card_number.isdigit():
