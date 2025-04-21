@@ -1,72 +1,57 @@
-import datetime
-from typing import Any, Optional
+
+import functools
+from datetime import datetime
 
 
-def log(filename: Optional[str] = None) -> Any:
-    """Декоратор, который автоматически регистрирует детали
-    выполнения функций, такие как: время вызова, имя функции,
-    передаваемые аргументы, результат выполнения и информацию об ошибках"""
+def log(filename=None):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Формируем информацию о вызове функции
+            func_name = func.__name__
+            inputs = f"Inputs: {args}, {kwargs}"
 
-    def decorator_1(func: Any) -> Any:
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Формируем информацию о запуске функции
-            mark = ""
-            start_time = datetime.datetime.now()
-            log_entry = [
-                f"{func.__name__} started with arguments: {args}, {kwargs}",
-            ]
+            # Логируем начало выполнения функции
+            start_time = datetime.now()
+            start_msg = f"{start_time} - {func_name} started with {inputs}\n"
+
+            if filename:
+                with open(filename, 'a') as f:
+                    f.write(start_msg)
+            else:
+                print(start_msg, end='')
 
             try:
-                # Вызываем функцию и получаем результат
+                # Выполняем функцию
                 result = func(*args, **kwargs)
 
-                if result:
-                    mark = "OK"
+                # Логируем успешное завершение
+                end_time = datetime.now()
+                duration = end_time - start_time
+                success_msg = f"{end_time} - {func_name} ok. Result: {result}. Duration: {duration}\n"
 
-                # Формируем информацию об успешном выполнении
-                end_time = datetime.datetime.now()
-                log_entry.extend(
-                    [
-                        f"Execution time: {end_time - start_time}",
-                        f"{func.__name__} ended -> {mark}",
-                        f"Results: {result}",
-                    ]
-                )
-
-                # Объединяем все строки лога
-                full_log = "\n".join(log_entry) + "\n"
-
-                # Записываем лог в файл или выводим в консоль
                 if filename:
-                    with open(filename, "a") as file:
-                        file.write(full_log)
+                    with open(filename, 'a') as f:
+                        f.write(success_msg)
                 else:
-                    print(full_log)
+                    print(success_msg, end='')
 
                 return result
 
             except Exception as e:
-                # Формируем информацию об ошибке
-                error_time = datetime.datetime.now()
-                log_entry.extend(
-                    [
-                        f"{func.__name__} raised an error",
-                        f"Error type: {type(e).__name__}",
-                        f"Error message: {str(e)}",
-                        f"Execution time before error: {error_time - start_time}",
-                    ]
-                )
+                # Логируем ошибку
+                end_time = datetime.now()
+                duration = end_time - start_time
+                error_msg = f"{end_time} - {func_name} error: {type(e).__name__}: {str(e)}. {inputs}. Duration: {duration}\n"
 
-                # Объединяем все строки лога
-                full_log = "\n".join(log_entry) + "\n"
-
-                # Записываем лог в файл или выводим в консоль
                 if filename:
-                    with open(filename, "a") as file:
-                        file.write(full_log)
+                    with open(filename, 'a') as f:
+                        f.write(error_msg)
                 else:
-                    print(full_log)
+                    print(error_msg, end='')
+
+                raise  # Пробрасываем исключение дальше
 
         return wrapper
 
-    return decorator_1
+    return decorator
