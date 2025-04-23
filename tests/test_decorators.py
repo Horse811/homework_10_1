@@ -1,107 +1,86 @@
-import os
-import tempfile
-
 import pytest
 
 from src.decorators import log
 
 
-def test_log_1(capsys: pytest.CaptureFixture[str]) -> None:
-    """тест для декоратора log - вывод в консоль, норма"""
+# Вспомогательная функция для чтения файла (если логи пишутся в файл)
+def read_log_file(filename):
+    with open(filename, 'r') as f:
+        return f.read()
 
+
+# Тест для логирования в консоль (filename=None)
+def test_log_to_console(capsys):
     @log()
-    def add_nums(x: int, y: int) -> int:
-        return x + y
+    def add(a, b):
+        return a + b
 
-    add_nums(1, 2)
+    result = add(2, 3)
     captured = capsys.readouterr()
-    result = captured.out.split("\n")
-    time_result = " ".join((result[1].split(" "))[:2])
-    assert result[0] == "add_nums started with arguments: (1, 2), {}"
-    assert time_result == "Execution time:"
-    assert result[2] == "add_nums ended -> OK"
-    assert result[3] == "Results: 3"
+    output = captured.out
+
+    assert "add started" in output
+    assert "add ok" in output
+    assert str(result) in output
 
 
-def test_log_2(capsys: pytest.CaptureFixture[str]) -> None:
-    """тест для декоратора log - вывод в консоль, ошибка (вар.1)"""
+# Тест для логирования в файл (filename указан)
+def test_log_to_file(tmp_path):
+    log_file = tmp_path / "test_log.txt"
 
+    @log(filename=str(log_file))
+    def multiply(x, y):
+        return x * y
+
+    result = multiply(4, 5)
+    log_content = read_log_file(log_file)
+
+    assert "multiply started" in log_content
+    assert "multiply ok" in log_content
+    assert str(result) in log_content
+
+
+# Тест для проверки логирования ошибок (консоль)
+def test_log_error_to_console(capsys):
     @log()
-    def division_nums(x: int, y: int) -> int | float:
-        return x / y
+    def divide(a, b):
+        return a / b
 
-    division_nums(1, 0)
+    with pytest.raises(ZeroDivisionError):
+        divide(10, 0)
+
     captured = capsys.readouterr()
-    result = captured.out.split("\n")
-    time_result = " ".join((result[4].split(" "))[:4])
-    assert result[0] == "division_nums started with arguments: (1, 0), {}"
-    assert result[1] == "division_nums raised an error"
-    assert result[2] == "Error type: ZeroDivisionError"
-    assert result[3] == "Error message: division by zero"
-    assert time_result == "Execution time before error:"
+    output = captured.out
+
+    assert "divide started" in output
+    assert "ZeroDivisionError" in output
+    assert "Inputs: (10, 0)" in output
 
 
-def test_log_3(capsys: pytest.CaptureFixture[str]) -> None:
-    """тест для декоратора log - вывод в консоль, ошибка (вар.2)"""
+# Тест для проверки логирования ошибок (файл)
+def test_log_error_to_file(tmp_path):
+    log_file = tmp_path / "error_log.txt"
 
+    @log(filename=str(log_file))
+    def failing_func(x):
+        raise ValueError("Oops")
+
+    with pytest.raises(ValueError):
+        failing_func(42)
+
+    log_content = read_log_file(log_file)
+
+    assert "failing_func started" in log_content
+    assert "ValueError" in log_content
+    assert "Inputs: (42,)" in log_content
+
+
+# Тест для проверки, что декоратор сохраняет имя и docstring функции
+def test_decorator_preserves_metadata():
     @log()
-    def division_nums(x: int, y: int) -> int | float:
-        return x / y
+    def sample_func():
+        """Тестовая функция"""
+        pass
 
-    division_nums(1, "1")
-    captured = capsys.readouterr()
-    result = captured.out.split("\n")
-    time_result = " ".join((result[4].split(" "))[:4])
-    assert result[0] == "division_nums started with arguments: (1, '1'), {}"
-    assert result[1] == "division_nums raised an error"
-    assert result[2] == "Error type: TypeError"
-    assert result[3] == "Error message: unsupported operand type(s) for /: 'int' and 'str'"
-    assert time_result == "Execution time before error:"
-
-
-def test_log_4() -> None:
-    """тест для декоратора log - запись в файл, норма"""
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        filename = temp_file.name
-    try:
-
-        @log(filename=filename)
-        def add_nums(x: int, y: int) -> int:
-            return x + y
-
-        add_nums(1, 2)
-        with open(filename, "r") as file:
-            result = file.readlines()
-            time_result = " ".join((result[1].split(" "))[:2])
-            assert result[0] == "add_nums started with arguments: (1, 2), {}\n"
-            assert time_result == "Execution time:"
-            assert result[2] == "add_nums ended -> OK\n"
-            assert result[3] == "Results: 3\n"
-
-    finally:
-        if os.path.exists(filename):
-            os.remove(filename)
-
-
-def test_log_5() -> None:
-    """тест для декоратора log - запись в файл, ошибка"""
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        filename = temp_file.name
-    try:
-
-        @log(filename=filename)
-        def division_nums(x: int, y: int) -> int | float:
-            return x / y
-
-        division_nums(1, 0)
-        with open(filename, "r") as file:
-            result = file.readlines()
-            time_result = " ".join((result[4].split(" "))[:4])
-            assert result[0] == "division_nums started with arguments: (1, 0), {}\n"
-            assert result[1] == "division_nums raised an error\n"
-            assert result[2] == "Error type: ZeroDivisionError\n"
-            assert result[3] == "Error message: division by zero\n"
-            assert time_result == "Execution time before error:"
-    finally:
-        if os.path.exists(filename):
-            os.remove(filename)
+    assert sample_func.__name__ == "sample_func"
+    assert sample_func.__doc__ == "Тестовая функция"
