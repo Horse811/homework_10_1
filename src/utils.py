@@ -1,31 +1,42 @@
 import json
 from pathlib import Path
 from typing import List, Dict
+from logger_config import setup_logger
+
+# Инициализация логгера
+logger = setup_logger('utils', 'utils.log')
 
 
 def load_transactions(file_path: str) -> List[Dict]:
-    """Load transactions from JSON file.
-
-    Args:
-        file_path: Path to JSON file with transactions data
-
-    Returns:
-        List of transactions as dictionaries or empty list if:
-        - File not found
-        - File is empty
-        - File contains invalid JSON
-        - JSON content is not a list
-    """
+    logger.info(f"Loading transactions from {file_path}")
+    """Загружает транзакции из JSON-файла"""
     try:
         path = Path(file_path)
 
-        if not path.exists() or path.stat().st_size == 0:
+        if not path.exists():
+            logger.error(f"File not found: {file_path}")
             return []
 
-        with open(path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        if path.stat().st_size == 0:
+            logger.warning(f"Empty file: {file_path}")
+            return []
 
-        return data if isinstance(data, list) else []
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-    except (json.JSONDecodeError, PermissionError):
+        if not isinstance(data, list):
+            logger.error(f"File does not contain a list: {file_path}")
+            return []
+
+        logger.info(f"Successfully loaded {len(data)} transactions from {file_path}")
+        return data
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in file {file_path}: {str(e)}")
+        return []
+    except PermissionError as e:
+        logger.error(f"Permission denied for file {file_path}: {str(e)}")
+        return []
+    except Exception as e:
+        logger.exception(f"Unexpected error loading {file_path}: {str(e)}")
         return []
