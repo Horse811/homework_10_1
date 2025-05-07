@@ -1,6 +1,6 @@
 import unittest
-from parameterized import parameterized
-from src.masks import get_mask_card_number, get_mask_account
+from parameterized import parameterized  # type: ignore
+from src.masks import get_mask_card_number, get_mask_account_number
 
 
 class TestMasks(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestMasks(unittest.TestCase):
         if len(input_num) == 16:
             self.assertEqual(get_mask_card_number(input_num), expected)
         else:
-            self.assertEqual(get_mask_account(input_num), expected)
+            self.assertEqual(get_mask_account_number(input_num), expected)
 
     @parameterized.expand([
         ("Too_short_card", "123"),
@@ -26,7 +26,7 @@ class TestMasks(unittest.TestCase):
             if len(input_num) == 16 or not input_num:
                 get_mask_card_number(input_num)
             else:
-                get_mask_account(input_num)
+                get_mask_account_number(input_num)
 
 
 if __name__ == "__main__":
