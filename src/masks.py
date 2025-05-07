@@ -5,7 +5,7 @@ from logger_config import setup_logger
 logger = setup_logger('masks', 'masks.log')
 
 
-def mask_card_number(card_number: str) -> str:
+def get_mask_card_number(card_number: str) -> str:
     logger.info(f"Masking card number: {card_number}")
     """Маскирует номер карты"""
     try:
@@ -21,7 +21,7 @@ def mask_card_number(card_number: str) -> str:
         raise
 
 
-def mask_account_number(account_number: str) -> str:
+def get_mask_account_number(account_number: str) -> str:
     """Маскирует номер счета"""
     try:
         if len(account_number) < 4 or not account_number.isdigit():
