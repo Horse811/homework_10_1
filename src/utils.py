@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import List, Dict
-from logger_config import setup_logger
+from src.logger_config import setup_logger
 
 # Инициализация логгера
 logger = setup_logger('utils', 'utils.log')

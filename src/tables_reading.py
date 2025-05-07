@@ -26,20 +26,29 @@ def get_transactions_csv(file_path: str | None = None) -> Any:
         print("Ошибка! Файл не найден!")
 
 
-def get_transactions_xlsx(file_path: str | None = None) -> Any:
-    """Функция считывает транзакции из файла .xlsx и возвращает список словарей"""
+def get_transactions_xlsx(file_path: str | None = None) -> list[dict] | None:
+    """Функция считывает транзакции из файла .xlsx и возвращает список словарей."""
     if not file_path:
         file_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(file_dir, "..", "data", "transactions_excel.xlsx")
 
     try:
-        data_frame = pd.read_excel(file_path)
+        # Указываем движок явно
+        data_frame = pd.read_excel(file_path, engine="openpyxl")
         data_xlsx = data_frame.to_dict(orient="records")
+
+        if not data_xlsx:
+            print("Файл пуст или данные имеют неверный формат!")
+            return None
+
         return data_xlsx
+
     except FileNotFoundError:
-        print("Ошибка! Файл не найден!")
-    except Exception:
-        print("Данные имеют неверный формат!")
+        print(f"Ошибка! Файл не найден: {file_path}")
+        return None
+    except Exception as e:
+        print(f"Ошибка при чтении XLSX: {str(e)}")
+        return None
 
 
 if __name__ == "__main__":
