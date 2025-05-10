@@ -8,7 +8,7 @@ import openpyxl
 import re
 from typing import List, Dict
 from collections import Counter
-from operations import (
+from filter import (
     filter_transactions_by_description,
     count_transactions_by_category,
 )
