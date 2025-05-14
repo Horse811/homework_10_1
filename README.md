@@ -35,7 +35,7 @@
 1.  **Клонируйте репозиторий:**
 
     ```
-    git clone git@github.com:OksanaNiklashkova/Bank_Widget.git
+    git clone git@github.com:Horse811/Bank_Widget.git
     ```
 
 2.  **Перейдите в папку проекта:**
